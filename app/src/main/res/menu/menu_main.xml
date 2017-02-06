@@ -1,0 +1,28 @@
+<menu xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    tools:context="com.example.gucheng.hotmovies.MainActivity">
+    <item
+        android:icon="@android:drawable/ic_menu_more"
+        android:title="@string/action_popular"
+        app:showAsAction="ifRoom">
+
+        <menu>
+
+            <item
+                android:id="@+id/action_popular"
+                android:icon="@android:drawable/ic_media_ff"
+                android:title="@string/action_popular"
+                app:showAsAction="always"/>
+            <item
+                android:id="@+id/action_rates"
+                android:icon="@android:drawable/btn_star_big_on"
+                android:title="@string/action_rates"
+                app:showAsAction="always"/>
+        </menu>
+
+
+    </item>
+
+
+</menu>
