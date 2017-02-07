@@ -17,8 +17,7 @@ import com.squareup.picasso.Picasso;
  */
 public class EditorActivityFragment extends Fragment {
 
-    private static final int EXISTING_LOADER = 1;
-    private static final String RATE_STRING = "/10";
+    private static final String RATE_STRING = " / 10";
 
     private String imgUrl;
     private String overview;
@@ -59,12 +58,11 @@ public class EditorActivityFragment extends Fragment {
         TextView introTextView = (TextView) detailRootView.findViewById(R.id.overview_text);
 
 
-
         Picasso.with(getContext()).load(imgUrl).into(imageView);
         oriTitleTextView.setText(oriTitle);
         yearTextView.setText(year);
         languageTextView.setText(language);
-        rateTextView.setText(rate);
+        rateTextView.setText(rate + RATE_STRING);
         introTextView.setText(overview);
         return detailRootView;
     }

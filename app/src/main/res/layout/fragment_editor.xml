@@ -37,6 +37,7 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:maxLines="3"
+                    style="@style/detail_text_style"
                     android:textSize="@dimen/detail_text_dimen"
                     tools:text="original title"/>
 
@@ -44,18 +45,21 @@
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/detail_text_dimen"
+                    style="@style/detail_text_style"
                     tools:text="year"/>
 
                 <TextView   android:id="@+id/language_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:textSize="@dimen/detail_text_dimen"
+                    style="@style/detail_text_style"
                     tools:text="language"/>
 
                 <TextView   android:id="@+id/rate_text"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:textSize="@dimen/detail_text_dimen"
+                    style="@style/detail_text_style"
+                    android:textSize="24sp"
                     tools:text="rate"/>
             </LinearLayout>
         </LinearLayout>
@@ -64,6 +68,9 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="16dp"
+            android:lineSpacingExtra="4dp"
+            android:textColor="@android:color/black"
+            android:textSize="@dimen/overview_text_dimen"
             tools:text="overview"/>
 
     </LinearLayout>
