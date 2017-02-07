@@ -43,10 +43,13 @@ public class QueryUtils {
         if(TextUtils.isEmpty(movieJSON)){
             return null;
         }
-        String movieTitle;
-        String movieYear;
-        String movieCountry;
         String movieImgUrl;
+        String movieOverview;
+        String movieYear;
+        String movieOriTitle;
+        String movieTitle;
+        String movieLanguage;
+        double movieRate;
 
         ArrayList<Movies> movies = new ArrayList<>();
 
@@ -55,11 +58,14 @@ public class QueryUtils {
             JSONArray jsonArray = jsonObject.getJSONArray("results");
             for(int i = 0; i < jsonArray.length();i++){
                 JSONObject j = jsonArray.getJSONObject(i);
-                movieTitle = j.getString("title");
-                movieYear = j.getString("release_date").substring(0,4);
-                movieCountry = j.getString("original_language");
                 movieImgUrl = IMG_URL_FRONTER + j.getString("poster_path");
-                movies.add(new Movies(movieTitle,movieYear,movieCountry,movieImgUrl));
+                movieOverview = j.getString("overview");
+                movieYear = j.getString("release_date").substring(0,4);
+                movieOriTitle = j.getString("original_title");
+                movieTitle = j.getString("title");
+                movieLanguage = j.getString("original_language");
+                movieRate = j.getDouble("vote_average");
+                movies.add(new Movies(movieImgUrl,movieOverview,movieOriTitle,movieTitle,movieYear,movieLanguage,movieRate));
             }
         } catch (JSONException e) {
             e.printStackTrace();

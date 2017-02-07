@@ -1,5 +1,6 @@
 package com.example.gucheng.hotmovies;
 
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
@@ -12,6 +13,8 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ProgressBar;
 
+import com.google.gson.Gson;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,6 +25,7 @@ import java.util.List;
 public class MainActivityFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<List<Movies>>{
     static String tmdbUrl = "http://192.168.1.6:8000/f/17dce405f2/?raw=1";
+    private static final int IMAGE_LOADER = 1;
 
     private View rootView;
     private GridView gridView;
@@ -41,14 +45,19 @@ public class MainActivityFragment extends Fragment implements
         LoaderManager loaderManager = getLoaderManager();
         mImageAdapter = new ImageAdapter(getActivity(),new ArrayList<Movies>());
 
-        final int IMAGE_LOADER = 1;
+
         loaderManager.initLoader(IMAGE_LOADER,null,this);
 
         gridView.setAdapter(mImageAdapter);
         gridView.setOnItemClickListener(new AdapterView.OnItemClickListener() {
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
-//                Intent intent = new Intent(getContext(),DetailActivity.class);
+
+                Intent intent = new Intent(getContext(),EditorActivity.class);
+                Movies m = mMovies.get(position);
+                String jsonString = new Gson().toJson(m);
+                intent.putExtra("clicked",jsonString);
+                startActivity(intent);
             }
         });
 
@@ -67,8 +76,8 @@ public class MainActivityFragment extends Fragment implements
     public void onLoadFinished(Loader<List<Movies>> loader, List<Movies> movies) {
         mMovies = movies;
         mImageAdapter.clear();
-//        mProgressBar.setVisibility(View.GONE);
         List<Movies> listTemp = new ArrayList<>();
+//        mProgressBar.setVisibility(View.GONE);
 
         if(mMovies != null && !mMovies.isEmpty()){
             for (int i = 0; i < mMovies.size(); i++){

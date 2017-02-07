@@ -2,7 +2,6 @@ package com.example.gucheng.hotmovies;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
-import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
@@ -33,7 +32,6 @@ class ImageAdapter extends ArrayAdapter<Movies> {
         String imgUrl = null;
         if (currentMovies != null) {
             imgUrl = currentMovies.getImgUrl();
-            Log.v("imgUrl",imgUrl);
         }
         if(convertView == null){
             imageView = new ImageView(mContext);

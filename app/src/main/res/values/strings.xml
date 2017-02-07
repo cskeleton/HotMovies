@@ -2,4 +2,11 @@
     <string name="app_name">HotMovies</string>
     <string name="action_popular">Most Popular</string>
     <string name="action_rates">Highest Rates</string>
+    <string name="title_activity_editor">EditorActivity</string>
+    <string name="action_settings">Settings</string>
+
+    <string name="original_title">Original title: </string>
+    <string name="publish_year">Publish year: </string>
+    <string name="language">Language: </string>
+    <string name="rate">Rate: </string>
 </resources>

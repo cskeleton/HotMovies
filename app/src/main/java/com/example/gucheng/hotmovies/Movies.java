@@ -5,26 +5,35 @@ package com.example.gucheng.hotmovies;
  */
 
 class Movies {
-    private String mTitle;
-    private String mYear;
-    private String mCountry;
     private String mImgUrl;
+    private String mOverview;
+    private String mYear;
+    private String mOriTitle;
+    private String mTitle;
+    private String mLanguage;
+    private double mRate;
 
     // For detail page use.
-    Movies(String title, String year, String country, String imgUrl){
-        mTitle = title;
-        mYear = year;
-        mCountry = country;
+    Movies(String imgUrl, String overview, String oriTitle, String title, String year, String Language, double rate){
         mImgUrl = imgUrl;
+        mOverview = overview;
+        mYear = year;
+        mOriTitle = oriTitle;
+        mTitle = title;
+        mLanguage = Language;
+        mRate = rate;
     }
 
-    Movies(String imgUrl){
-        mImgUrl = imgUrl;
-    }
+    //For poster page.
+    Movies(String imgUrl){mImgUrl = imgUrl;}
 
     // Getter
-    String getTitle(){return mTitle;}
-    String getYear(){return mYear;}
-    String getCountry(){return mCountry;}
     String getImgUrl(){return mImgUrl;}
+    String getOverview(){return mOverview;}
+    String getYear(){return mYear;}
+    String getOriTitle(){return mOriTitle;}
+    String getTitle(){return mTitle;}
+    String getLanguage(){return mLanguage;}
+    double getRate(){return mRate;}
+
 }
