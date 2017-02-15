@@ -114,7 +114,7 @@ public class MainActivityFragment extends Fragment implements
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
-        switch (id){                  // how to refresh the data and UI?
+        switch (id){
             case R.id.action_popular:
                 tmdbUrl = popUrl;
                 toolbar.setTitle("Popular");
@@ -141,7 +141,7 @@ public class MainActivityFragment extends Fragment implements
         mMovies = movies;
         mImageAdapter.clear();
         List<Movies> listTemp = new ArrayList<>();
-        mProgressBar.setVisibility(View.GONE);    //unfinished.
+        mProgressBar.setVisibility(View.GONE);
 
         if(mMovies != null && !mMovies.isEmpty()){
             for (int i = 0; i < mMovies.size(); i++){
@@ -153,9 +153,9 @@ public class MainActivityFragment extends Fragment implements
             ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
             NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
             if(networkInfo != null && networkInfo.isConnected()){
-                mTextView.setText("No News");
+                mTextView.setText(R.string.no_data);
             }else {
-                mTextView.setText("No Internet connect available");
+                mTextView.setText(R.string.no_internet);
             }
         }
     }

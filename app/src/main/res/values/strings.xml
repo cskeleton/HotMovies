@@ -9,4 +9,6 @@
     <string name="publish_year">Publish year: </string>
     <string name="language">Language: </string>
     <string name="rate">Rate: </string>
+    <string name="no_data">No Movie Data</string>
+    <string name="no_internet">No Internet connect available</string>
 </resources>
