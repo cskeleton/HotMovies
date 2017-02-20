@@ -1,4 +1,4 @@
-package com.example.gucheng.hotmovies;
+package com.example.gucheng.hotmovies.data.local.Adapter;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -8,6 +8,7 @@ import android.widget.ArrayAdapter;
 import android.widget.GridView;
 import android.widget.ImageView;
 
+import com.example.gucheng.hotmovies.data.local.Movies;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -16,10 +17,10 @@ import java.util.ArrayList;
  * Created by gucheng on 2017/2/4.
  */
 
-class ImageAdapter extends ArrayAdapter<Movies> {
+public class ImageAdapter extends ArrayAdapter<Movies> {
     private Context mContext;
 
-    ImageAdapter(Context context, ArrayList<Movies> movies){
+    public ImageAdapter(Context context, ArrayList<Movies> movies){
         super(context,0,movies);
         mContext = context;
     }
@@ -31,7 +32,7 @@ class ImageAdapter extends ArrayAdapter<Movies> {
         ImageView imageView;
         String imgUrl = null;
         if (currentMovies != null) {
-            imgUrl = currentMovies.getImgUrl();
+            imgUrl = currentMovies.getPosterUrl();
         }
         if(convertView == null){
             imageView = new ImageView(mContext);

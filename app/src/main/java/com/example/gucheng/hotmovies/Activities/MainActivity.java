@@ -1,7 +1,9 @@
-package com.example.gucheng.hotmovies;
+package com.example.gucheng.hotmovies.Activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
+
+import com.example.gucheng.hotmovies.R;
 
 public class MainActivity extends AppCompatActivity {
 

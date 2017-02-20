@@ -4,7 +4,7 @@
     android:id="@+id/content_editor"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.gucheng.hotmovies.EditorActivityFragment"
+    tools:context="com.example.gucheng.hotmovies.Fragments.EditorActivityFragment"
     tools:showIn="@layout/activity_editor">
 
     <LinearLayout

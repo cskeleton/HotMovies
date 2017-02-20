@@ -1,4 +1,4 @@
-package com.example.gucheng.hotmovies;
+package com.example.gucheng.hotmovies.Fragments;
 
 import android.content.Context;
 import android.content.Intent;
@@ -24,6 +24,11 @@ import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
 
+import com.example.gucheng.hotmovies.Activities.EditorActivity;
+import com.example.gucheng.hotmovies.R;
+import com.example.gucheng.hotmovies.data.local.Adapter.ImageAdapter;
+import com.example.gucheng.hotmovies.data.local.Loaders.MoviesLoader;
+import com.example.gucheng.hotmovies.data.local.Movies;
 import com.google.gson.Gson;
 
 import java.util.ArrayList;
@@ -36,13 +41,6 @@ import java.util.List;
 public class MainActivityFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<List<Movies>>{
 
-    //Set up API-KEY of TMDB here!!!!
-    static final String API_KEY = BuildConfig.API_KEY;
-
-
-    static String popUrl = "http://api.themoviedb.org/3/movie/popular?language=zh&api_key="+API_KEY;
-    static String highUrl = "http://api.themoviedb.org/3/movie/top_rated?language=zh&api_key="+API_KEY;
-    static String tmdbUrl = popUrl;
     private static final int IMAGE_LOADER = 1;
 
     private Toolbar toolbar;
@@ -116,12 +114,12 @@ public class MainActivityFragment extends Fragment implements
         int id = item.getItemId();
         switch (id){
             case R.id.action_popular:
-                tmdbUrl = popUrl;
+                tmdbUrl = POP_URL;
                 toolbar.setTitle("Popular");
                 getLoaderManager().restartLoader(1,null,this);
                 break;
             case R.id.action_rates:
-                tmdbUrl = highUrl;
+                tmdbUrl = HIGH_URL;
                 toolbar.setTitle("Top rated");
                 getLoaderManager().restartLoader(1,null,this);
                 break;
@@ -145,7 +143,7 @@ public class MainActivityFragment extends Fragment implements
 
         if(mMovies != null && !mMovies.isEmpty()){
             for (int i = 0; i < mMovies.size(); i++){
-                String mImgUrl = mMovies.get(i).getImgUrl();
+                String mImgUrl = mMovies.get(i).getPosterUrl();
                 listTemp.add(new Movies(mImgUrl));
             }
             mImageAdapter.addAll(listTemp);

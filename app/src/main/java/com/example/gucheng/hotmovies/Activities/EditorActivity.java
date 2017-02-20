@@ -1,9 +1,11 @@
-package com.example.gucheng.hotmovies;
+package com.example.gucheng.hotmovies.Activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.view.MenuItem;
+
+import com.example.gucheng.hotmovies.R;
 
 public class EditorActivity extends AppCompatActivity {
 
@@ -29,5 +31,4 @@ public class EditorActivity extends AppCompatActivity {
         }
         return super.onOptionsItemSelected(item);
     }
-
 }

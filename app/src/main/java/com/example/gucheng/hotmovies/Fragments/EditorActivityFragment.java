@@ -1,4 +1,4 @@
-package com.example.gucheng.hotmovies;
+package com.example.gucheng.hotmovies.Fragments;
 
 import android.content.Intent;
 import android.os.Bundle;
@@ -9,6 +9,8 @@ import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
 
+import com.example.gucheng.hotmovies.R;
+import com.example.gucheng.hotmovies.data.local.Movies;
 import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
@@ -39,9 +41,9 @@ public class EditorActivityFragment extends Fragment {
         String jsonString = intent.getStringExtra("clicked");
 
         Movies movies = new Gson().fromJson(jsonString,Movies.class);
-        imgUrl = movies.getImgUrl();
+        imgUrl = movies.getPosterUrl();
         overview = movies.getOverview();
-        year = movies.getYear();
+        year = movies.getDate();
         oriTitle = movies.getOriTitle();
         title = movies.getTitle();
         language = movies.getLanguage();
