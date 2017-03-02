@@ -1,10 +1,10 @@
 package com.example.gucheng.hotmovies.data.remote;
 
 import android.content.ContentValues;
+import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
-import com.example.gucheng.hotmovies.data.local.Movies;
 import com.example.gucheng.hotmovies.data.local.db.MovieContract.MovieEntry;
 
 import org.json.JSONArray;
@@ -19,8 +19,6 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  * Created by gucheng on 2017/2/4.
@@ -29,103 +27,96 @@ import java.util.List;
 public class QueryUtils {
     private static final String LOG_TAG = QueryUtils.class.getName();
 
-    private static final String IMG_URL_FRONTIER = "http://image.tmdb.org/t/p/w185";
-    private static final String REIVEW_URL_FRONTIER = "https://www.themoviedb.org/review/";
-    private static final String TRAILER_URL_FRONTIER = "https://www.youtube.com/watch?v=";
-
     private static String userLanguage;
 
-    public static List<Movies> fetchData(String requestUrl,String language) {
+    public static void fetchData(String requestUrl,String language,Context context) {
         userLanguage = language;
         URL url = createUrl(requestUrl);
-        String jsonResponse = null;
+        String jsonResponse;
         try{
+            Log.v("URL,,",String.valueOf(url));
             jsonResponse = makeHTTPRequest(url);
+            extractFeatureFromJson(jsonResponse,context);
         }catch (IOException e){
             Log.e(LOG_TAG,"Error closing input steam ",e);
         }
-        return extractFeatureFromJson(jsonResponse);
     }
 
-    private static List<Movies> extractFeatureFromJson(String movieJSON) {
-        if(TextUtils.isEmpty(movieJSON)){
-            return null;
-        }
-        int movieId;
-        String movieTitle;
-        String movieImgUrl;
-        String movieYear;
-        String movieOverview;
-        double movieRate;
-        int movieRuntime;
-        String movieReviewUrl;
-        String movieVideoUrl;
-        String movieOriTitle;
-        String movieLanguage;
+    private static void extractFeatureFromJson(String movieJSON,Context context) {
+        if(!TextUtils.isEmpty(movieJSON)) {
+            int movieId;
+            String movieTitle;
+            String movieImgUrl;
+            String movieYear;
+            String movieOverview;
+            double movieRate;
+            int movieRuntime;
+            String movieReviewUrl;
+            String movieVideoUrl;
+            String movieOriTitle;
+            String movieLanguage;
 
+            try {
+                JSONObject movieListJsonObject = new JSONObject(movieJSON);
+                JSONArray movieListJsonArray = movieListJsonObject.getJSONArray("results");
+//                for (int i = 0; i < movieListJsonArray.length(); i++) {
+                for (int i = 0; i < 1; i++) {
+                    JSONObject listJ = movieListJsonArray.getJSONObject(i);
+                    movieId = listJ.getInt("id");
+                    movieTitle = listJ.getString("title");
+                    movieImgUrl = listJ.getString("poster_path");
+                    movieYear = listJ.getString("release_date").substring(0, 4);
+                    movieOverview = listJ.getString("overview");
+                    movieRate = listJ.getDouble("vote_average");
+                    movieOriTitle = listJ.getString("original_title");
+                    movieLanguage = listJ.getString("original_language");
 
-        ArrayList<Movies> movies = new ArrayList<>();
+                    String detailString = GetUrl.getMovieUrl(String.valueOf(movieId));
+                    URL detailUrl  = createUrl(detailString);
+                    String detailJsonResponse = null;
+                    try {
+                        detailJsonResponse = makeHTTPRequest(detailUrl);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                    Log.v("DetailUrl",detailString);
 
-        try {
-            JSONObject movieListJsonObject = new JSONObject(movieJSON);
-            JSONArray movieListJsonArray = movieListJsonObject.getJSONArray("results");
-            for(int i = 0; i < movieListJsonArray.length();i++){
-                JSONObject listJ = movieListJsonArray.getJSONObject(i);
-                movieId = listJ.getInt("id");
-                movieTitle = listJ.getString("title");
-                movieImgUrl = IMG_URL_FRONTIER + listJ.getString("poster_path");
-                movieYear = listJ.getString("release_date").substring(0,4);
-                movieOverview = listJ.getString("overview");
-                movieRate = listJ.getDouble("vote_average");
-                movieOriTitle = listJ.getString("original_title");
-                movieLanguage = listJ.getString("original_language");
+                    JSONObject detailJ = new JSONObject(detailJsonResponse);
+                    Log.v("detailJ", String.valueOf(detailJ));
 
-                JSONObject detailJ = new JSONObject(GetUrl.getDetailUrl(movieId,userLanguage));
-                movieRuntime = detailJ.getInt("runtime");
+                    movieRuntime = detailJ.getInt("runtime");
 
-                movieVideoUrl = GetUrl.getTrailerUrl(movieId);
-                movieReviewUrl = GetUrl.getReviewsUrl(movieId);
+                    movieVideoUrl = GetUrl.getTrailerUrl(movieId);
+                    movieReviewUrl = GetUrl.getReviewsUrl(movieId);
 
-                movies.add(new Movies(movieId,movieTitle,movieImgUrl,movieYear,movieOverview,
-                        movieRate,movieRuntime,movieReviewUrl,movieVideoUrl,movieOriTitle,movieLanguage));
-                saveToDatabase(movies.get(i));
+                    try {
+                        Poster.savePoster(movieImgUrl,movieId);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+                    ContentValues cv = new ContentValues();
+                    cv.put(MovieEntry.COLUNM_MOVIE_ID, movieId);
+                    cv.put(MovieEntry.COLUNM_MOVIE_TITLE, movieTitle);
+                    cv.put(MovieEntry.COLUNM_MOVIE_POSTER_PATH, movieImgUrl);
+                    cv.put(MovieEntry.COLUNM_MOVIE_DATE, movieYear);
+                    cv.put(MovieEntry.COLUNM_MOVIE_OVERVIEW, movieOverview);
+                    cv.put(MovieEntry.COLUNM_MOVIE_SCORE, movieRate);
+                    cv.put(MovieEntry.COLUNM_MOVIE_RUNTIME, movieRuntime);
+                    cv.put(MovieEntry.COLUNM_MOVIE_REVIEW, movieReviewUrl);
+                    cv.put(MovieEntry.COLUNM_MOVIE_VIDEOS, movieVideoUrl);
+                    cv.put(MovieEntry.COLUNM_MOVIE_ORIGINAL_TITLE, movieOriTitle);
+                    cv.put(MovieEntry.COLUNM_MOVIE_LANGUAGE, movieLanguage);
+
+                    context.getContentResolver().insert(MovieEntry.CONTENT_URI, cv);
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
             }
-        } catch (JSONException e) {
-            e.printStackTrace();
+        }else {
+            Log.e(LOG_TAG,"Null json data");
         }
-        return movies;
     }
-
-    private static boolean saveToDatabase(Movies movie){
-        ContentValues cv = new ContentValues();
-
-        String title = movie.getTitle();
-        String posterUrl = movie.getPosterUrl();
-        String date = movie.getDate();
-        String overview = movie.getOverview();
-        Double rate = movie.getRate();
-        int runtime = movie.getRuntime();
-        String reviews = movie.getReview();     // The string format of JSON Object.
-        String videos = movie.getVideo();       // The url of trailer video.
-        String oriTitle = movie.getOriTitle();
-        String language = movie.getLanguage();
-
-        cv.put(MovieEntry.COLUNM_MOVIE_ORIGINAL_TITLE,title);
-        cv.put(MovieEntry.COLUNM_MOVIE_POSTER_PATH,posterUrl);
-        cv.put(MovieEntry.COLUNM_MOVIE_DATE,date);
-        cv.put(MovieEntry.COLUNM_MOVIE_OVERVIEW,overview);
-        cv.put(MovieEntry.COLUNM_MOVIE_SCORE,rate);
-        cv.put(MovieEntry.COLUNM_MOVIE_RUNTIME,runtime);
-        cv.put(MovieEntry.COLUNM_MOVIE_REVIEW,reviews);
-        cv.put(MovieEntry.COLUNM_MOVIE_VIDEOS,videos);
-        cv.put(MovieEntry.COLUNM_MOVIE_ORIGINAL_TITLE,oriTitle);
-        cv.put(MovieEntry.COLUNM_MOVIE_LANGUAGE,language);
-
-        getContentResolver().insert(
-                uri,
-                cv);
-    }
-
 
     private static String makeHTTPRequest(URL url) throws IOException {
         String jsonResponse = null;
@@ -140,7 +131,7 @@ public class QueryUtils {
             urlConnection.setReadTimeout(10000);
             urlConnection.setConnectTimeout(15000);
 
-            if(urlConnection.getResponseCode() ==200){
+            if(urlConnection.getResponseCode() == 200){
                 inputStream = urlConnection.getInputStream();
                 jsonResponse = readFromStream(inputStream);
             }else {

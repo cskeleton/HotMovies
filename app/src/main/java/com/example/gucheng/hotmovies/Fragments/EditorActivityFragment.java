@@ -1,8 +1,11 @@
 package com.example.gucheng.hotmovies.Fragments;
 
 import android.content.Intent;
+import android.database.Cursor;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -10,14 +13,13 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.example.gucheng.hotmovies.R;
-import com.example.gucheng.hotmovies.data.local.Movies;
-import com.google.gson.Gson;
 import com.squareup.picasso.Picasso;
 
 /**
  * A placeholder fragment containing a simple view.
  */
-public class EditorActivityFragment extends Fragment {
+public class EditorActivityFragment extends Fragment
+        implements LoaderManager.LoaderCallbacks<Cursor>{
 
     private static final String RATE_STRING = " / 10";
 
@@ -40,15 +42,6 @@ public class EditorActivityFragment extends Fragment {
         Intent intent = getActivity().getIntent();
         String jsonString = intent.getStringExtra("clicked");
 
-        Movies movies = new Gson().fromJson(jsonString,Movies.class);
-        imgUrl = movies.getPosterUrl();
-        overview = movies.getOverview();
-        year = movies.getDate();
-        oriTitle = movies.getOriTitle();
-        title = movies.getTitle();
-        language = movies.getLanguage();
-        double rateDouble = movies.getRate();
-        rate = String.format("%.1f",rateDouble);
 
         getActivity().setTitle(title);
 
@@ -67,5 +60,20 @@ public class EditorActivityFragment extends Fragment {
         rateTextView.setText(rate + RATE_STRING);
         introTextView.setText(overview);
         return detailRootView;
+    }
+
+    @Override
+    public Loader<Cursor> onCreateLoader(int id, Bundle args) {
+        return null;
+    }
+
+    @Override
+    public void onLoadFinished(Loader<Cursor> loader, Cursor data) {
+
+    }
+
+    @Override
+    public void onLoaderReset(Loader<Cursor> loader) {
+
     }
 }

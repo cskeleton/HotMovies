@@ -1,4 +1,4 @@
-package com.example.gucheng.hotmovies.Activities;
+package com.example.gucheng.hotmovies.activities;
 
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;

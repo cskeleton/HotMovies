@@ -5,7 +5,7 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:fitsSystemWindows="true"
-    tools:context="com.example.gucheng.hotmovies.Activities.MainActivity">
+    tools:context="com.example.gucheng.hotmovies.activities.MainActivity">
 
     <ProgressBar    android:id="@+id/progress_bar"
         android:layout_width="wrap_content"
@@ -40,13 +40,14 @@
             android:numColumns="2"
             android:stretchMode="columnWidth"
             android:gravity="fill_horizontal" />
+
     </android.support.v4.widget.SwipeRefreshLayout>
 
     <TextView   android:id="@+id/empty_text"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="center"
-        tools:text="empty text"/>
+        android:text="empty text"/>
 
 </android.support.design.widget.CoordinatorLayout>
 
