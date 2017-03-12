@@ -9,3 +9,5 @@
 .externalNativeBuild
 /gradle.properties
 .idea/vcs.xml
+/gradle/wrapper/gradle-wrapper.properties
+!/gradle/wrapper/gradle-wrapper.properties

@@ -5,6 +5,7 @@ import android.content.Context;
 import android.text.TextUtils;
 import android.util.Log;
 
+import com.example.gucheng.hotmovies.data.local.beans.Reviews;
 import com.example.gucheng.hotmovies.data.local.db.MovieContract.MovieEntry;
 
 import org.json.JSONArray;
@@ -19,6 +20,8 @@ import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by gucheng on 2017/2/4.
@@ -26,23 +29,35 @@ import java.nio.charset.Charset;
 
 public class QueryUtils {
     private static final String LOG_TAG = QueryUtils.class.getName();
+    private static final String YOUTUBE_URL = "https://www.youtube.com/watch?v=";
 
     private static String userLanguage;
 
-    public static void fetchData(String requestUrl,String language,Context context) {
+    public static void fetchMovieData(String requestUrl, String language, Context context) {
         userLanguage = language;
         URL url = createUrl(requestUrl);
         String jsonResponse;
         try{
-            Log.v("URL,,",String.valueOf(url));
+//            Log.v("URL,,",String.valueOf(url));
             jsonResponse = makeHTTPRequest(url);
-            extractFeatureFromJson(jsonResponse,context);
+            extractMovieDataFromJson(jsonResponse,context);
         }catch (IOException e){
             Log.e(LOG_TAG,"Error closing input steam ",e);
         }
     }
 
-    private static void extractFeatureFromJson(String movieJSON,Context context) {
+    public static List<Reviews> fetchReviewData(String requestUrl) {
+        URL url = createUrl(requestUrl);
+        String jsonResponse = null;
+        try{
+            jsonResponse = makeHTTPRequest(url);
+        }catch (IOException e){
+            Log.e(LOG_TAG,"Error closing input steam ",e);
+        }
+        return extractReviewFromJson(jsonResponse);
+    }
+
+    private static void extractMovieDataFromJson(String movieJSON, Context context) {
         if(!TextUtils.isEmpty(movieJSON)) {
             int movieId;
             String movieTitle;
@@ -56,11 +71,12 @@ public class QueryUtils {
             String movieOriTitle;
             String movieLanguage;
 
+            context.getContentResolver().delete(MovieEntry.CONTENT_URI,null,null);
+
             try {
                 JSONObject movieListJsonObject = new JSONObject(movieJSON);
                 JSONArray movieListJsonArray = movieListJsonObject.getJSONArray("results");
-//                for (int i = 0; i < movieListJsonArray.length(); i++) {
-                for (int i = 0; i < 1; i++) {
+                for (int i = 0; i < movieListJsonArray.length(); i++) {
                     JSONObject listJ = movieListJsonArray.getJSONObject(i);
                     movieId = listJ.getInt("id");
                     movieTitle = listJ.getString("title");
@@ -79,14 +95,27 @@ public class QueryUtils {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    Log.v("DetailUrl",detailString);
+//                    Log.v("DetailUrl",detailString);
 
                     JSONObject detailJ = new JSONObject(detailJsonResponse);
-                    Log.v("detailJ", String.valueOf(detailJ));
+//                    Log.v("detailJ", String.valueOf(detailJ));
 
                     movieRuntime = detailJ.getInt("runtime");
 
                     movieVideoUrl = GetUrl.getTrailerUrl(movieId);
+                    JSONObject jsonVideo;
+                    try {
+                        String jsonVideoResponse = makeHTTPRequest(createUrl(movieVideoUrl));
+                        if(jsonVideoResponse != null){
+                            jsonVideo = new JSONObject(jsonVideoResponse);
+                            JSONArray jsonVideoArray = jsonVideo.getJSONArray("results");
+                            JSONObject jsonVideoObject = jsonVideoArray.getJSONObject(1);
+                            movieVideoUrl = YOUTUBE_URL + jsonVideoObject.getString("key");
+                        }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
                     movieReviewUrl = GetUrl.getReviewsUrl(movieId);
 
                     try {
@@ -116,6 +145,32 @@ public class QueryUtils {
         }else {
             Log.e(LOG_TAG,"Null json data");
         }
+
+    }
+
+    private static List<Reviews> extractReviewFromJson(String reviewJSON) {
+        List<Reviews> mComments = new ArrayList<>();
+
+        if(!TextUtils.isEmpty(reviewJSON)) {
+            String mAuthor;
+            String mReview;
+
+            try {
+                JSONObject reviewsListJsonObject = new JSONObject(reviewJSON);
+                JSONArray reviewListJsonArray = reviewsListJsonObject.getJSONArray("results");
+                for (int i = 0; i < reviewListJsonArray.length(); i++) {
+                    JSONObject review = reviewListJsonArray.getJSONObject(i);
+                    mAuthor = review.getString("author");
+                    mReview = review.getString("content");
+                    mComments.add(new Reviews(mAuthor,mReview));
+                }
+            } catch (JSONException e) {
+                e.printStackTrace();
+            }
+        }else {
+            Log.e(LOG_TAG,"Null json data");
+        }
+        return mComments;
     }
 
     private static String makeHTTPRequest(URL url) throws IOException {

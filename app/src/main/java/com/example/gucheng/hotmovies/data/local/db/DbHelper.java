@@ -22,6 +22,9 @@ public class DbHelper extends SQLiteOpenHelper{
 
         String SQL_CREATE_MOVIEDATA_TABLE = "CREATE TABLE " + MovieEntry.TABLE_NAME + " ( " +
                 MovieEntry._ID + " INTEGER PRIMARY KEY AUTOINCREMENT," +
+                MovieEntry.COLUMN_MOVIE_POPULAR + " BOOLEAN, " +
+                MovieEntry.COLUMN_MOVIE_HIGH + " BOOLEAN, " +
+                MovieEntry.COLUMN_MOIVE_FAVOURITE + " BOOLEAN, " +
                 MovieEntry.COLUNM_MOVIE_TITLE + " TEXT, " +
                 MovieEntry.COLUNM_MOVIE_ID + " INTEGER, " +
                 MovieEntry.COLUNM_MOVIE_ORIGINAL_TITLE + " TEXT, " +

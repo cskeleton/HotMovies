@@ -57,7 +57,8 @@ public class Poster {
     }
 
     public static Bitmap getPoster(int mMovieId) throws IOException{
-        String moviePath = FILE_DIR + mMovieId;
+        String moviePath = FILE_DIR + mMovieId + ".jpg";
+        Log.v("Poster,Path",moviePath);
         File poster = new File(moviePath);
         if (poster.exists()) {
             return BitmapFactory.decodeFile(moviePath);
