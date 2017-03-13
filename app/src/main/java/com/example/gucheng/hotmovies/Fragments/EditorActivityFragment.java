@@ -22,6 +22,7 @@ import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.gucheng.hotmovies.R;
 import com.example.gucheng.hotmovies.activities.CommentsActivity;
@@ -107,8 +108,13 @@ public class EditorActivityFragment extends Fragment
         trailerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                Intent i = new Intent(Intent.ACTION_VIEW,Uri.parse(trailerString));
-                startActivity(i);
+                Uri uri = Uri.parse(trailerString);
+                if(uri != null) {
+                    Intent i = new Intent(Intent.ACTION_VIEW,uri);
+                    startActivity(i);
+                }else {
+                    Toast.makeText(getActivity(),"No Trailer available",Toast.LENGTH_SHORT).show();
+                }
             }
         });
         getLoaderManager().initLoader(EXISTING_MOVIE_LOADER,null,this);

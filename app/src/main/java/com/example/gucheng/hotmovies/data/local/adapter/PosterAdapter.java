@@ -41,9 +41,7 @@ public class PosterAdapter extends CursorAdapter {
 
     @Override
     public View newView(Context context, Cursor cursor, ViewGroup parent) {
-        Log.v("PosterAdapter","newView has been called.");
         LayoutInflater inflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-//        parent.setLayoutParams(new GridView(GridView.AUTO_FIT,rowHight));
         return inflater.inflate(R.layout.list_poster,parent,false);
     }
 

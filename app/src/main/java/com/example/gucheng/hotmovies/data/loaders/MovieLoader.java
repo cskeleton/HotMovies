@@ -2,7 +2,10 @@ package com.example.gucheng.hotmovies.data.loaders;
 
 import android.content.Context;
 import android.database.Cursor;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.net.Uri;
+import android.util.Log;
 
 import com.example.gucheng.hotmovies.data.remote.QueryUtils;
 
@@ -18,6 +21,8 @@ public class MovieLoader extends android.content.CursorLoader {
     private String mSelection;
     private String[] mSelectionArgs;
     private String mSortOrder;
+    private static Boolean isFetch = false;
+    private static Cursor cursor;
 
     public MovieLoader(String url, String language, Context context, Uri uri, String[] projection, String selection, String[] selectionArgs, String sortOrder) {
         super(context,uri,projection,selection,selectionArgs,sortOrder);
@@ -33,6 +38,7 @@ public class MovieLoader extends android.content.CursorLoader {
 
     @Override
     protected void onStartLoading() {
+        Log.v("onStartLoading","onStartLoading");
         forceLoad();
     }
 
@@ -44,9 +50,20 @@ public class MovieLoader extends android.content.CursorLoader {
      **/
     @Override
     public Cursor loadInBackground() {
-        QueryUtils.fetchMovieData(mUrl,mLanguage,mContext);
-        Cursor cursor = super.loadInBackground();
+        Log.v("background","loading in bg");
+        ConnectivityManager connMgr = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+        if(networkInfo != null && networkInfo.isConnected() && isFetch){
+            QueryUtils.fetchMovieData(mUrl,mLanguage,mContext);
+            isFetch = false;
+        }
+        cursor = super.loadInBackground();
         return cursor;
+    }
+
+    public static boolean isFetch(Boolean b){
+        isFetch = b;
+        return isFetch;
     }
 
 }

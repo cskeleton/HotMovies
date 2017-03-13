@@ -8,6 +8,7 @@ import android.database.Cursor;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.Nullable;
+import android.util.Log;
 
 import static com.example.gucheng.hotmovies.data.local.db.MovieContract.CONTENT_AUTHORITY;
 import static com.example.gucheng.hotmovies.data.local.db.MovieContract.MOVIE_PATH;
@@ -115,6 +116,7 @@ public class MovieProvider extends ContentProvider {
         final String DELETE_ALL = "1";
         SQLiteDatabase database = mMovieDbHelper.getWritableDatabase();
         database.delete(MovieEntry.TABLE_NAME,DELETE_ALL,null);
+        Log.v("delete"," Database deleted.");
         return 0;
     }
 

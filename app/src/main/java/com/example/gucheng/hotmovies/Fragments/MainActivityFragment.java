@@ -75,7 +75,7 @@ public class MainActivityFragment extends Fragment implements
         GetUrl.setLanguage(mUserLanguage);
 
         //Set default url.
-        requestUrl = GetUrl.getMovieUrl(GetUrl.HIGH_URL);
+        requestUrl = GetUrl.getMovieUrl(GetUrl.POP_URL);
 
         //Toolbar
         toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
@@ -87,7 +87,7 @@ public class MainActivityFragment extends Fragment implements
         mProgressBar.setVisibility(View.VISIBLE);
 
 
-        //grid view and gridview.empty view
+        //grid view and gridView.empty view
         gridView = (GridView) rootView.findViewById(R.id.grid_view);
         mEmptyText = (TextView) rootView.findViewById(R.id.empty_text);
         gridView.setEmptyView(mEmptyText);
@@ -111,11 +111,11 @@ public class MainActivityFragment extends Fragment implements
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
-                //Clear database
-
-                getActivity().getContentResolver().delete(MovieEntry.CONTENT_URI,null,null);
                 //Get the data from Internet again.
-                loaderManager.restartLoader(1,null,callback);
+                mProgressBar.setVisibility(View.VISIBLE);
+                MovieLoader.isFetch(true);
+                getActivity().getContentResolver().delete(MovieEntry.CONTENT_URI,null,null);
+                loaderManager.restartLoader(IMAGE_LOADER,null,callback);
                 swipeRefreshLayout.setRefreshing(false);
             }
         });
@@ -149,12 +149,14 @@ public class MainActivityFragment extends Fragment implements
             case R.id.action_popular:
                 requestUrl = GetUrl.getMovieUrl(GetUrl.POP_URL);
                 toolbar.setTitle("Popular");
-                getLoaderManager().restartLoader(IMAGE_LOADER,null,this);
+//                mProgressBar.setVisibility(View.VISIBLE);
+//                getLoaderManager().restartLoader(IMAGE_LOADER,null,this);
                 break;
             case R.id.action_rates:
                 requestUrl = GetUrl.getMovieUrl(GetUrl.HIGH_URL);
                 toolbar.setTitle("Top rated");
-                getLoaderManager().restartLoader(IMAGE_LOADER,null,this);
+//                mProgressBar.setVisibility(View.VISIBLE);
+//                getLoaderManager().restartLoader(IMAGE_LOADER,null,this);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -194,6 +196,7 @@ public class MainActivityFragment extends Fragment implements
                 mEmptyText.setText("No Internet connect available.");
             }
         }
+        MovieLoader.isFetch(false);
     }
 
     @Override

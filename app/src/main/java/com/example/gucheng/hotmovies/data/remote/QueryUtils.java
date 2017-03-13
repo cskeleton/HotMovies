@@ -58,25 +58,26 @@ public class QueryUtils {
     }
 
     private static void extractMovieDataFromJson(String movieJSON, Context context) {
-        if(!TextUtils.isEmpty(movieJSON)) {
-            int movieId;
-            String movieTitle;
-            String movieImgUrl;
-            String movieYear;
-            String movieOverview;
-            double movieRate;
-            int movieRuntime;
-            String movieReviewUrl;
-            String movieVideoUrl;
-            String movieOriTitle;
-            String movieLanguage;
-
-            context.getContentResolver().delete(MovieEntry.CONTENT_URI,null,null);
+                if(!TextUtils.isEmpty(movieJSON)) {
+                    int movieId;
+                    String movieTitle;
+                    String movieImgUrl;
+                    String movieYear;
+                    String movieOverview;
+                    double movieRate;
+                    int movieRuntime;
+                    String movieReviewUrl;
+                    String movieVideoUrl;
+                    String movieOriTitle;
+                    String movieLanguage;
 
             try {
                 JSONObject movieListJsonObject = new JSONObject(movieJSON);
                 JSONArray movieListJsonArray = movieListJsonObject.getJSONArray("results");
-                for (int i = 0; i < movieListJsonArray.length(); i++) {
+                Log.v("length", String.valueOf(movieListJsonArray.length()));
+                for (int i = 0; i < 3; i++) {
+//                    for (int i = 0; i < movieListJsonArray.length(); i++) {
+                    Log.v("i", String.valueOf(i));
                     JSONObject listJ = movieListJsonArray.getJSONObject(i);
                     movieId = listJ.getInt("id");
                     movieTitle = listJ.getString("title");
@@ -109,8 +110,10 @@ public class QueryUtils {
                         if(jsonVideoResponse != null){
                             jsonVideo = new JSONObject(jsonVideoResponse);
                             JSONArray jsonVideoArray = jsonVideo.getJSONArray("results");
-                            JSONObject jsonVideoObject = jsonVideoArray.getJSONObject(1);
-                            movieVideoUrl = YOUTUBE_URL + jsonVideoObject.getString("key");
+                            if(jsonVideoArray.length()>=1){
+                                JSONObject jsonVideoObject = jsonVideoArray.getJSONObject(0);
+                                movieVideoUrl = YOUTUBE_URL + jsonVideoObject.getString("key");
+                            }
                         }
                     } catch (IOException e) {
                         e.printStackTrace();

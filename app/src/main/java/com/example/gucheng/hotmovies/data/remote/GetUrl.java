@@ -1,7 +1,5 @@
 package com.example.gucheng.hotmovies.data.remote;
 
-import android.util.Log;
-
 import com.example.gucheng.hotmovies.BuildConfig;
 
 import java.util.Objects;
@@ -49,7 +47,6 @@ public class GetUrl {
     }
 
     public static String getPosterUrl(String mPosterUrl){
-        Log.v("posterUrl,", IMG_BASE_URL + mPosterUrl);
         return IMG_BASE_URL + mPosterUrl;
     }
 }
