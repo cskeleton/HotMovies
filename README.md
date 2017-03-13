@@ -1,1 +1,1 @@
-Insert API-KEY of TMDB in MainActivityFragment.
+Insert API-KEY of TMDB in GetUrl.
