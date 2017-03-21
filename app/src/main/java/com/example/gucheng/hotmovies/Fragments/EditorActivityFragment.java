@@ -2,6 +2,7 @@ package com.example.gucheng.hotmovies.Fragments;
 
 import android.app.Fragment;
 import android.app.LoaderManager;
+import android.content.ContentValues;
 import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
@@ -13,6 +14,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
 import android.util.DisplayMetrics;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -52,6 +54,7 @@ public class EditorActivityFragment extends Fragment
     private String runtime;
     private String trailerString;
     private String reviewString;
+    private int isFavInt;
     private int movieId;
     private Uri currentUri;
     private Button trailerButton;
@@ -64,6 +67,8 @@ public class EditorActivityFragment extends Fragment
     private TextView rateTextView;
     private TextView runtimeTextView;
     private TextView introTextView;
+    private MenuItem mFavItem;
+    private Menu mMenu;
 
     private int w_px;
     private int w_dip;
@@ -82,13 +87,13 @@ public class EditorActivityFragment extends Fragment
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
         detailView = inflater.inflate(R.layout.fragment_editor, container, false);
-
         //Toolbar
         toolbar = (Toolbar) detailView.findViewById(R.id.detail_toolbar);
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
 
         Intent intent = getActivity().getIntent();
         currentUri = intent.getData();
+        Log.v("GetUri", String.valueOf(currentUri));
 
         trailerButton = (Button) detailView.findViewById(R.id.trailer);
         imageView = (ImageView) detailView.findViewById(R.id.detail_image);
@@ -104,6 +109,9 @@ public class EditorActivityFragment extends Fragment
         density = displayMetrics.density;
         w_dip = (int) (w_px/density);
 
+        getLoaderManager().initLoader(EXISTING_MOVIE_LOADER,null,this);
+
+
 
         trailerButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -117,13 +125,16 @@ public class EditorActivityFragment extends Fragment
                 }
             }
         });
-        getLoaderManager().initLoader(EXISTING_MOVIE_LOADER,null,this);
+
         return detailView;
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         inflater.inflate(R.menu.menu_editor, menu);
+        mFavItem = menu.findItem(R.id.add_favourite);
+        if(isFavInt == 0){ mFavItem.setIcon(R.drawable.ic_favorite_white_24dp);}
+        else { mFavItem.setIcon(R.drawable.ic_favorite_border_white_24dp); }
         super.onCreateOptionsMenu(menu, inflater);
     }
 
@@ -131,13 +142,27 @@ public class EditorActivityFragment extends Fragment
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id){
-            case R.id.action_comments:
+            case R.id.show_comments:
                 Intent i = new Intent(getActivity(), CommentsActivity.class);
-                i.putExtra(MovieEntry.COLUNM_MOVIE_REVIEW,reviewString);
+                i.putExtra(MovieEntry.COLUMN_MOVIE_REVIEW,reviewString);
                 startActivity(i);
                 break;
-            case R.id.action_favourite:
-                //TODO: mark a true in database.
+            case R.id.add_favourite:
+                ContentValues values = new ContentValues();
+                String whereClause = MovieEntry.COLUMN_MOVIE_ID + "=?";
+                String[] whereArgs = {String.valueOf(movieId)};
+                if(isFavInt == 0){
+                    values.put(MovieEntry.COLUMN_MOVIE_FAVOURITE,1);
+                    item.setIcon(R.drawable.ic_favorite_border_white_24dp);
+                    isFavInt = 1;
+                    Toast.makeText(getActivity(),"Added to favourite.",Toast.LENGTH_SHORT).show();
+                }else {
+                    values.put(MovieEntry.COLUMN_MOVIE_FAVOURITE,0);
+                    item.setIcon(R.drawable.ic_favorite_white_24dp);
+                    isFavInt = 0;
+                    Toast.makeText(getActivity(),"Removed from favourite.",Toast.LENGTH_SHORT).show();
+                }
+                getActivity().getContentResolver().update(currentUri,values,whereClause,whereArgs);
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -146,19 +171,21 @@ public class EditorActivityFragment extends Fragment
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String projection[] = {
-                MovieEntry._ID + "INTEGER PRIMARY KEY," +
-                        MovieEntry.COLUNM_MOVIE_TITLE,
-                        MovieEntry.COLUNM_MOVIE_ID,
-                        MovieEntry.COLUNM_MOVIE_ORIGINAL_TITLE,
-                        MovieEntry.COLUNM_MOVIE_OVERVIEW,
-                        MovieEntry.COLUNM_MOVIE_DATE,
-                        MovieEntry.COLUNM_MOVIE_LANGUAGE,
-                        MovieEntry.COLUNM_MOVIE_POSTER_PATH,
-                        MovieEntry.COLUNM_MOVIE_SCORE,
-                        MovieEntry.COLUNM_MOVIE_RUNTIME,
-                        MovieEntry.COLUNM_MOVIE_VIDEOS,
-                        MovieEntry.COLUNM_MOVIE_REVIEW };
-        return new CursorLoader(getActivity(),MovieEntry.CONTENT_URI,projection,null,null,null);
+            MovieEntry._ID,
+            MovieEntry.COLUMN_MOVIE_TITLE,
+            MovieEntry.COLUMN_MOVIE_ID,
+            MovieEntry.COLUMN_MOVIE_ORIGINAL_TITLE,
+            MovieEntry.COLUMN_MOVIE_OVERVIEW,
+            MovieEntry.COLUMN_MOVIE_DATE,
+            MovieEntry.COLUMN_MOVIE_LANGUAGE,
+            MovieEntry.COLUMN_MOVIE_POSTER_PATH,
+            MovieEntry.COLUMN_MOVIE_SCORE,
+            MovieEntry.COLUMN_MOVIE_RUNTIME,
+            MovieEntry.COLUMN_MOVIE_VIDEOS,
+            MovieEntry.COLUMN_MOVIE_REVIEW,
+            MovieEntry.COLUMN_MOVIE_FAVOURITE
+        };
+        return new CursorLoader(getActivity(),currentUri,projection,null,null,null);
     }
 
     @Override
@@ -167,17 +194,17 @@ public class EditorActivityFragment extends Fragment
             return;
         }
         if (cursor.moveToFirst()){
-            movieId = cursor.getInt(cursor.getColumnIndexOrThrow(MovieEntry.COLUNM_MOVIE_ID));
-            title = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUNM_MOVIE_TITLE));
-            trailerString = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUNM_MOVIE_VIDEOS));
-            reviewString = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUNM_MOVIE_REVIEW));
-            oriTitle = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUNM_MOVIE_ORIGINAL_TITLE));
-            year = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUNM_MOVIE_DATE));
-            language = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUNM_MOVIE_LANGUAGE));
-            rate = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUNM_MOVIE_SCORE));
-            runtime = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUNM_MOVIE_RUNTIME));
-            overview = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUNM_MOVIE_OVERVIEW));
-
+            movieId = cursor.getInt(cursor.getColumnIndexOrThrow(MovieEntry.COLUMN_MOVIE_ID));
+            title = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUMN_MOVIE_TITLE));
+            trailerString = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUMN_MOVIE_VIDEOS));
+            reviewString = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUMN_MOVIE_REVIEW));
+            oriTitle = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUMN_MOVIE_ORIGINAL_TITLE));
+            year = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUMN_MOVIE_DATE));
+            language = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUMN_MOVIE_LANGUAGE));
+            rate = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUMN_MOVIE_SCORE));
+            runtime = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUMN_MOVIE_RUNTIME));
+            overview = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUMN_MOVIE_OVERVIEW));
+            isFavInt = cursor.getInt(cursor.getColumnIndexOrThrow(MovieEntry.COLUMN_MOVIE_FAVOURITE));
         }
 
         toolbar.setTitle(title);

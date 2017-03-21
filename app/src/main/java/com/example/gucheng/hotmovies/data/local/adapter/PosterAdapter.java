@@ -52,10 +52,10 @@ public class PosterAdapter extends CursorAdapter {
         TextView titleTV = (TextView) view.findViewById(R.id.title);
 
 
-        String title = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUNM_MOVIE_TITLE));
+        String title = cursor.getString(cursor.getColumnIndexOrThrow(MovieEntry.COLUMN_MOVIE_TITLE));
         titleTV.setText(title);
 
-        int movieId = cursor.getInt(cursor.getColumnIndexOrThrow(MovieEntry.COLUNM_MOVIE_ID));
+        int movieId = cursor.getInt(cursor.getColumnIndexOrThrow(MovieEntry.COLUMN_MOVIE_ID));
         try {
             bitmap = Poster.getPoster(movieId);
         } catch (IOException e) {

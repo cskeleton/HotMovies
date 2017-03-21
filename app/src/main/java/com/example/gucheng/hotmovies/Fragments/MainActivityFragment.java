@@ -4,6 +4,7 @@ import android.app.Fragment;
 import android.app.LoaderManager;
 import android.content.ContentUris;
 import android.content.Context;
+import android.content.CursorLoader;
 import android.content.Intent;
 import android.content.Loader;
 import android.database.Cursor;
@@ -30,10 +31,10 @@ import android.widget.TextView;
 
 import com.example.gucheng.hotmovies.R;
 import com.example.gucheng.hotmovies.activities.EditorActivity;
-import com.example.gucheng.hotmovies.data.loaders.MovieLoader;
 import com.example.gucheng.hotmovies.data.local.adapter.PosterAdapter;
 import com.example.gucheng.hotmovies.data.local.db.MovieContract.MovieEntry;
 import com.example.gucheng.hotmovies.data.remote.GetUrl;
+import com.example.gucheng.hotmovies.data.remote.QueryMovies;
 
 
 /**
@@ -44,6 +45,10 @@ public class MainActivityFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor>{
 
     private static final int IMAGE_LOADER = 1;
+    private static final String POPULAR = "Popular";
+    private static final String TOP_RATED = "Top Rated";
+    private static final String FAVOURITE = "Favourite";
+
 
     private Toolbar toolbar;
     private TextView mEmptyText;
@@ -52,9 +57,14 @@ public class MainActivityFragment extends Fragment implements
     private PosterAdapter mAdapter;
     private SwipeRefreshLayout swipeRefreshLayout;
     private ProgressBar mProgressBar;
-    private LoaderManager.LoaderCallbacks callback;
     private String mUserLanguage = "en";
     private String requestUrl;
+    private String selection = MovieEntry.COLUMN_MOVIE_POPULAR + "=? AND " + MovieEntry.COLUMN_MOVIE_HIGH + "=? " ;
+    private static String[] selectionArgs;
+    private static LoaderManager.LoaderCallbacks<Cursor>  callback;
+    private static int mIsPop;
+    private static int mIsHigh;
+    private static int mIsFavourite;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -80,7 +90,11 @@ public class MainActivityFragment extends Fragment implements
         //Toolbar
         toolbar = (Toolbar) rootView.findViewById(R.id.toolbar);
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
-        toolbar.setTitle("Popular");
+        toolbar.setTitle(POPULAR);
+        callback = this;
+        mIsPop = 1;
+        mIsHigh = 0;
+        mIsFavourite = 0;
 
         //Progress bar init
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
@@ -100,7 +114,6 @@ public class MainActivityFragment extends Fragment implements
         //LoaderManager and LoaderCallbacks.
         final LoaderManager loaderManager = getLoaderManager();
         loaderManager.initLoader(IMAGE_LOADER,null,this);
-        callback = this;
 
         mAdapter = new PosterAdapter(w_dip,density,gridView,getActivity(),null);
         gridView.setAdapter(mAdapter);
@@ -111,12 +124,15 @@ public class MainActivityFragment extends Fragment implements
         swipeRefreshLayout.setOnRefreshListener(new SwipeRefreshLayout.OnRefreshListener() {
             @Override
             public void onRefresh() {
+
+                if(mIsFavourite == 1){
+                    mIsFavourite = 0;
+                }
                 //Get the data from Internet again.
-                mProgressBar.setVisibility(View.VISIBLE);
-                MovieLoader.isFetch(true);
-                getActivity().getContentResolver().delete(MovieEntry.CONTENT_URI,null,null);
-                loaderManager.restartLoader(IMAGE_LOADER,null,callback);
-                swipeRefreshLayout.setRefreshing(false);
+//                mProgressBar.setVisibility(View.VISIBLE);
+//                getActivity().getContentResolver().delete(MovieEntry.CONTENT_URI,null,null);
+                QueryMovies queryMovies = new QueryMovies(getActivity(),mUserLanguage,mIsPop,mIsHigh,mIsFavourite);
+                queryMovies.execute(requestUrl);
             }
         });
 
@@ -126,10 +142,9 @@ public class MainActivityFragment extends Fragment implements
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
 
                 Intent intent = new Intent(getActivity(),EditorActivity.class);
-                //TODO: open the detail page here.
                 Uri currentMovieUri = ContentUris.withAppendedId(MovieEntry.CONTENT_URI,id);
+                Log.v("Clicked uri", String.valueOf(currentMovieUri));
                 intent.setData(currentMovieUri);
-                Log.v("Position:", String.valueOf(id));
                 startActivity(intent);
             }
         });
@@ -148,38 +163,78 @@ public class MainActivityFragment extends Fragment implements
         switch (id){
             case R.id.action_popular:
                 requestUrl = GetUrl.getMovieUrl(GetUrl.POP_URL);
-                toolbar.setTitle("Popular");
-//                mProgressBar.setVisibility(View.VISIBLE);
-//                getLoaderManager().restartLoader(IMAGE_LOADER,null,this);
+                toolbar.setTitle(POPULAR);
+                mIsPop = 1;
+                mIsHigh = 0;
+                mIsFavourite = 0;
+                selection = MovieEntry.COLUMN_MOVIE_POPULAR + "=? AND " + MovieEntry.COLUMN_MOVIE_HIGH + "=? " ;
+                queryDatabase();
                 break;
             case R.id.action_rates:
                 requestUrl = GetUrl.getMovieUrl(GetUrl.HIGH_URL);
-                toolbar.setTitle("Top rated");
-//                mProgressBar.setVisibility(View.VISIBLE);
-//                getLoaderManager().restartLoader(IMAGE_LOADER,null,this);
+                toolbar.setTitle(TOP_RATED);
+                mIsHigh = 1;
+                mIsPop = 0;
+                mIsFavourite = 0;
+                selection = MovieEntry.COLUMN_MOVIE_POPULAR + "=? AND " + MovieEntry.COLUMN_MOVIE_HIGH + "=? " ;
+                queryDatabase();
+                break;
+            case R.id.action_favourite:
+                toolbar.setTitle(FAVOURITE);
+                mIsFavourite = 1;
+                selection = MovieEntry.COLUMN_MOVIE_FAVOURITE + "=?";
+                queryDatabase();
                 break;
         }
         return super.onOptionsItemSelected(item);
+    }
+
+    private void queryDatabase(){
+
+        int i;
+        if(toolbar.getTitle().equals(FAVOURITE) ){ i = 2;}
+        else if (toolbar.getTitle().equals(TOP_RATED)) { i = 1;}
+        else {i = 0;}
+
+        switch (i){
+            case 0:
+                selectionArgs = new String[]{String.valueOf(1),String.valueOf(0)};
+                break;
+            case 1:
+                selectionArgs = new String[]{String.valueOf(0),String.valueOf(1)};
+                break;
+            case 2:
+                selectionArgs = new String[]{String.valueOf(1)};
+                break;
+            default:
+                selectionArgs = null;
+                Log.e("MainFragment 174","Wrong query selection:" + i);
+        }
+        getLoaderManager().restartLoader(IMAGE_LOADER,null,callback);
     }
 
 
     @Override
     public Loader<Cursor> onCreateLoader(int id, Bundle args) {
         String projection[] = {
-                MovieEntry._ID + "INTEGER PRIMARY KEY," +
-                        MovieEntry.COLUNM_MOVIE_TITLE,
-                        MovieEntry.COLUNM_MOVIE_ID,
-                        MovieEntry.COLUNM_MOVIE_ORIGINAL_TITLE,
-                        MovieEntry.COLUNM_MOVIE_OVERVIEW,
-                        MovieEntry.COLUNM_MOVIE_DATE,
-                        MovieEntry.COLUNM_MOVIE_LANGUAGE,
-                        MovieEntry.COLUNM_MOVIE_POSTER_PATH,
-                        MovieEntry.COLUNM_MOVIE_SCORE,
-                        MovieEntry.COLUNM_MOVIE_RUNTIME,
-                        MovieEntry.COLUNM_MOVIE_VIDEOS,
-                        MovieEntry.COLUNM_MOVIE_REVIEW
+                MovieEntry._ID,
+                MovieEntry.COLUMN_MOVIE_POPULAR,
+                MovieEntry.COLUMN_MOVIE_HIGH,
+                MovieEntry.COLUMN_MOVIE_FAVOURITE,
+                MovieEntry.COLUMN_MOVIE_TITLE,
+                MovieEntry.COLUMN_MOVIE_ID,
+                MovieEntry.COLUMN_MOVIE_ORIGINAL_TITLE,
+                MovieEntry.COLUMN_MOVIE_OVERVIEW,
+                MovieEntry.COLUMN_MOVIE_DATE,
+                MovieEntry.COLUMN_MOVIE_LANGUAGE,
+                MovieEntry.COLUMN_MOVIE_POSTER_PATH,
+                MovieEntry.COLUMN_MOVIE_SCORE,
+                MovieEntry.COLUMN_MOVIE_RUNTIME,
+                MovieEntry.COLUMN_MOVIE_VIDEOS,
+                MovieEntry.COLUMN_MOVIE_REVIEW
         };
-        return new MovieLoader(requestUrl,mUserLanguage,getActivity(), MovieEntry.CONTENT_URI,projection,null,null,null);
+
+        return new CursorLoader(getActivity(),MovieEntry.CONTENT_URI,projection, selection,selectionArgs,null);
     }
 
     @Override
@@ -196,7 +251,7 @@ public class MainActivityFragment extends Fragment implements
                 mEmptyText.setText("No Internet connect available.");
             }
         }
-        MovieLoader.isFetch(false);
+        swipeRefreshLayout.setRefreshing(false);
     }
 
     @Override

@@ -2,6 +2,7 @@
     <string name="app_name">HotMovies</string>
     <string name="action_popular">Most Popular</string>
     <string name="action_rates">Highest Rates</string>
+    <string name="action_favourites">Favourites</string>
     <string name="title_activity_editor">EditorActivity</string>
     <string name="action_settings">Settings</string>
 

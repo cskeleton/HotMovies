@@ -51,7 +51,7 @@ public class CommentsFragment extends Fragment implements
                              Bundle savedInstanceState) {
         // Inflate the layout for this fragment
         Intent i = getActivity().getIntent();
-        mReviewUrl = i.getStringExtra(MovieEntry.COLUNM_MOVIE_REVIEW);
+        mReviewUrl = i.getStringExtra(MovieEntry.COLUMN_MOVIE_REVIEW);
 
         rootCommentsView = inflater.inflate(R.layout.fragment_comments, container, false);
 

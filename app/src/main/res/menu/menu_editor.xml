@@ -2,18 +2,17 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-    tools:context="com.example.gucheng.hotmovies.Activities.EditorActivity">
+    tools:context="com.example.gucheng.hotmovies.activities.EditorActivity">
 
     <item
-        android:id="@+id/action_comments"
-        android:title="commentses"
-        android:icon="@android:drawable/ic_menu_set_as"
+        android:id="@+id/show_comments"
+        android:title="comments"
+        android:icon="@drawable/ic_comment_white_24dp"
         app:showAsAction="ifRoom" />
 
     <item
-        android:id="@+id/action_favourite"
-        android:title="favourite"
-        android:icon="@android:drawable/star_on"
+        android:id="@+id/add_favourite"
+        android:title="add to favourite"
         app:showAsAction="ifRoom" />
 
 </menu>

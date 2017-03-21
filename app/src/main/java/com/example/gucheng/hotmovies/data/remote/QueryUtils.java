@@ -30,12 +30,18 @@ import java.util.List;
 public class QueryUtils {
     private static final String LOG_TAG = QueryUtils.class.getName();
     private static final String YOUTUBE_URL = "https://www.youtube.com/watch?v=";
+    private static int mIsPop;
+    private static int mIsHigh;
+    private static int mIsFav;
 
     private static String userLanguage;
 
-    public static void fetchMovieData(String requestUrl, String language, Context context) {
+    public static void fetchMovieData(String requestUrl, String language, Context context, int isPop, int isHigh, int isFav) {
         userLanguage = language;
         URL url = createUrl(requestUrl);
+        mIsPop = isPop;
+        mIsHigh = isHigh;
+        mIsFav = isFav;
         String jsonResponse;
         try{
 //            Log.v("URL,,",String.valueOf(url));
@@ -75,6 +81,7 @@ public class QueryUtils {
                 JSONObject movieListJsonObject = new JSONObject(movieJSON);
                 JSONArray movieListJsonArray = movieListJsonObject.getJSONArray("results");
                 Log.v("length", String.valueOf(movieListJsonArray.length()));
+                ContentValues[] cvs = new ContentValues[movieListJsonArray.length()];
                 for (int i = 0; i < 3; i++) {
 //                    for (int i = 0; i < movieListJsonArray.length(); i++) {
                     Log.v("i", String.valueOf(i));
@@ -126,21 +133,27 @@ public class QueryUtils {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-
                     ContentValues cv = new ContentValues();
-                    cv.put(MovieEntry.COLUNM_MOVIE_ID, movieId);
-                    cv.put(MovieEntry.COLUNM_MOVIE_TITLE, movieTitle);
-                    cv.put(MovieEntry.COLUNM_MOVIE_POSTER_PATH, movieImgUrl);
-                    cv.put(MovieEntry.COLUNM_MOVIE_DATE, movieYear);
-                    cv.put(MovieEntry.COLUNM_MOVIE_OVERVIEW, movieOverview);
-                    cv.put(MovieEntry.COLUNM_MOVIE_SCORE, movieRate);
-                    cv.put(MovieEntry.COLUNM_MOVIE_RUNTIME, movieRuntime);
-                    cv.put(MovieEntry.COLUNM_MOVIE_REVIEW, movieReviewUrl);
-                    cv.put(MovieEntry.COLUNM_MOVIE_VIDEOS, movieVideoUrl);
-                    cv.put(MovieEntry.COLUNM_MOVIE_ORIGINAL_TITLE, movieOriTitle);
-                    cv.put(MovieEntry.COLUNM_MOVIE_LANGUAGE, movieLanguage);
-
-                    context.getContentResolver().insert(MovieEntry.CONTENT_URI, cv);
+                    cv.put(MovieEntry.COLUMN_MOVIE_ID, movieId);
+                    cv.put(MovieEntry.COLUMN_MOVIE_TITLE, movieTitle);
+                    cv.put(MovieEntry.COLUMN_MOVIE_POSTER_PATH, movieImgUrl);
+                    cv.put(MovieEntry.COLUMN_MOVIE_DATE, movieYear);
+                    cv.put(MovieEntry.COLUMN_MOVIE_OVERVIEW, movieOverview);
+                    cv.put(MovieEntry.COLUMN_MOVIE_SCORE, movieRate);
+                    cv.put(MovieEntry.COLUMN_MOVIE_RUNTIME, movieRuntime);
+                    cv.put(MovieEntry.COLUMN_MOVIE_REVIEW, movieReviewUrl);
+                    cv.put(MovieEntry.COLUMN_MOVIE_VIDEOS, movieVideoUrl);
+                    cv.put(MovieEntry.COLUMN_MOVIE_ORIGINAL_TITLE, movieOriTitle);
+                    cv.put(MovieEntry.COLUMN_MOVIE_LANGUAGE, movieLanguage);
+                    cv.put(MovieEntry.COLUMN_MOVIE_POPULAR,mIsPop);
+                    cv.put(MovieEntry.COLUMN_MOVIE_HIGH,mIsHigh);
+                    cv.put(MovieEntry.COLUMN_MOVIE_FAVOURITE,mIsFav);
+                    cvs[i] = cv;
+//                    context.getContentResolver().insert(MovieEntry.CONTENT_URI, cv);
+//                    context.getContentResolver().bulkInsert(MovieEntry.CONTENT_URI,cvs);
+                    String whereClause = MovieEntry.COLUMN_MOVIE_ID + "=?";
+                    String[] whereArgs = {String.valueOf(movieId)};
+                    context.getContentResolver().update(MovieEntry.CONTENT_URI,cv,whereClause,whereArgs);
                 }
             } catch (JSONException e) {
                 e.printStackTrace();
@@ -148,7 +161,6 @@ public class QueryUtils {
         }else {
             Log.e(LOG_TAG,"Null json data");
         }
-
     }
 
     private static List<Reviews> extractReviewFromJson(String reviewJSON) {

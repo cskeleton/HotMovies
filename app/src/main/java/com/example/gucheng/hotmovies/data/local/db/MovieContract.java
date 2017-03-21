@@ -25,20 +25,20 @@ public class MovieContract {
         public static final Uri CONTENT_URI = Uri.withAppendedPath(BASE_CONTENT_URI,MOVIE_PATH);
 
         public static final String TABLE_NAME = "movies";
-        public static final String COLUNM_MOVIE_ID = "movieID";
-        public static final String COLUNM_MOVIE_TITLE = "title";
-        public static final String COLUNM_MOVIE_POSTER_PATH = "poster_path";    //poster url
-        public static final String COLUNM_MOVIE_DATE = "release_date";
-        public static final String COLUNM_MOVIE_OVERVIEW = "overview";
-        public static final String COLUNM_MOVIE_SCORE = "user_score";
-        public static final String COLUNM_MOVIE_RUNTIME = "runtime";
-        public static final String COLUNM_MOVIE_REVIEW = "reviews";
-        public static final String COLUNM_MOVIE_VIDEOS = "videos";
-        public static final String COLUNM_MOVIE_ORIGINAL_TITLE = "original_title";
-        public static final String COLUNM_MOVIE_LANGUAGE = "original_language";
+        public static final String COLUMN_MOVIE_ID = "movieID";
+        public static final String COLUMN_MOVIE_TITLE = "title";
+        public static final String COLUMN_MOVIE_POSTER_PATH = "poster_path";    //poster url
+        public static final String COLUMN_MOVIE_DATE = "release_date";
+        public static final String COLUMN_MOVIE_OVERVIEW = "overview";
+        public static final String COLUMN_MOVIE_SCORE = "user_score";
+        public static final String COLUMN_MOVIE_RUNTIME = "runtime";
+        public static final String COLUMN_MOVIE_REVIEW = "reviews";
+        public static final String COLUMN_MOVIE_VIDEOS = "videos";
+        public static final String COLUMN_MOVIE_ORIGINAL_TITLE = "original_title";
+        public static final String COLUMN_MOVIE_LANGUAGE = "original_language";
         public static final String COLUMN_MOVIE_POPULAR = "isPopular";
         public static final String COLUMN_MOVIE_HIGH = "isHighScore";
-        public static final String COLUMN_MOIVE_FAVOURITE = "isFavourite";
+        public static final String COLUMN_MOVIE_FAVOURITE = "isFavourite";
 
     }
 }

@@ -5,8 +5,10 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
+import android.database.sqlite.SQLiteAbortException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
+import android.support.annotation.NonNull;
 import android.support.annotation.Nullable;
 import android.util.Log;
 
@@ -47,7 +49,7 @@ public class MovieProvider extends ContentProvider {
 
         switch (match){
             case MOVIES:
-                cursor = database.query(MovieEntry.TABLE_NAME,null,selection,selectionArgs,
+                cursor = database.query(MovieEntry.TABLE_NAME,projection,selection,selectionArgs,
                         sortOrder,null,null);
                 break;
             case MOVIE_ID:
@@ -57,7 +59,7 @@ public class MovieProvider extends ContentProvider {
                         null,null,sortOrder);
                 break;
             default:
-                throw new IllegalArgumentException("Can't query unknow URI" + uri);
+                throw new IllegalArgumentException("Can't query unknown URI" + uri);
         }
         cursor.setNotificationUri(getContext().getContentResolver(),uri);
         return cursor;
@@ -73,7 +75,7 @@ public class MovieProvider extends ContentProvider {
             case MOVIE_ID:
                 return MovieEntry.CONTENT_ITEM_TYPE;
             default:
-                throw new IllegalArgumentException("Unknow URI" + uri + "with match " + match);
+                throw new IllegalArgumentException("Unknown URI" + uri + "with match " + match);
         }
     }
 
@@ -83,32 +85,40 @@ public class MovieProvider extends ContentProvider {
         final int match = sUriMatcher.match(uri);
         switch (match){
             case MOVIES:
-                return insertMovie(uri,contentValues);
+                SQLiteDatabase database = mMovieDbHelper.getWritableDatabase();
+                long id = database.insert(MovieEntry.TABLE_NAME,null,contentValues);
+                getContext().getContentResolver().notifyChange(uri,null);
+                return ContentUris.withAppendedId(uri,id);
             case MOVIE_ID:
                 throw new IllegalArgumentException("Insertion is not supported for " +  uri);
         }
         return null;
     }
 
-    private Uri insertMovie(Uri uri, ContentValues contentValues) {
-
-        /**
-         * All data comes from Internet, users cannot insert data from UI,
-         * so check the input is unnecessary?
-         *
-         * for the moment , I disabled these code for checking the legality.
-         */
-         /*
-         String title = contentValues.getAsString(MovieEntry.COLUNM_MOVIE_ORIGINAL_TITLE);
-         if(title == null){
-              throw new IllegalArgumentException("Title couldn't be null.");
-         }
-         */
-
-        SQLiteDatabase database = mMovieDbHelper.getWritableDatabase();
-        long id = database.insert(MovieEntry.TABLE_NAME,null,contentValues);
-        getContext().getContentResolver().notifyChange(uri,null);
-        return ContentUris.withAppendedId(uri,id);
+    @Override
+    public int bulkInsert(@NonNull Uri uri, @NonNull ContentValues[] values) {
+        int numInserted = 0;
+        int match = sUriMatcher.match(uri);
+        switch (match){
+            case MOVIES:
+                SQLiteDatabase database = mMovieDbHelper.getWritableDatabase();
+                database.beginTransaction();
+                for(ContentValues cv : values){
+                    long newID = database.insertOrThrow(MovieEntry.TABLE_NAME,null,cv);
+                    if(newID <= 0){
+                        throw new SQLiteAbortException("Failed when bulk insert" + uri);
+                    }else {
+                        numInserted++;
+                    }
+                }
+                database.setTransactionSuccessful();
+                getContext().getContentResolver().notifyChange(uri,null);
+                numInserted = values.length;
+                database.endTransaction();
+                return numInserted;
+            default:
+                throw new IllegalArgumentException("BulkInsert Error");
+        }
     }
 
     @Override
@@ -116,12 +126,32 @@ public class MovieProvider extends ContentProvider {
         final String DELETE_ALL = "1";
         SQLiteDatabase database = mMovieDbHelper.getWritableDatabase();
         database.delete(MovieEntry.TABLE_NAME,DELETE_ALL,null);
+        getContext().getContentResolver().notifyChange(uri,null);
         Log.v("delete"," Database deleted.");
         return 0;
     }
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        return 0;
+        int mRowsUpdated = 0;
+        final SQLiteDatabase database = mMovieDbHelper.getWritableDatabase();
+        final int match = sUriMatcher.match(uri);
+        switch (match){
+            case MOVIES:
+                mRowsUpdated = database.update(MovieEntry.TABLE_NAME,values,selection,selectionArgs);
+                Log.v("mRows", String.valueOf(mRowsUpdated));
+                if(mRowsUpdated == 0){
+                    database.insertWithOnConflict(MovieEntry.TABLE_NAME,null,values,SQLiteDatabase.CONFLICT_IGNORE);
+                }
+                getContext().getContentResolver().notifyChange(uri,null);
+                return mRowsUpdated;
+            case MOVIE_ID:
+                mRowsUpdated =  database.update(MovieEntry.TABLE_NAME,values,selection,selectionArgs);
+                Log.v("Favourites","favourite delete");
+                getContext().getContentResolver().notifyChange(uri,null);
+                return mRowsUpdated;
+            default:
+                throw new IllegalArgumentException("Update is not supported for " +  uri);
+        }
     }
 }
