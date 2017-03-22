@@ -44,7 +44,6 @@ public class QueryUtils {
         mIsFav = isFav;
         String jsonResponse;
         try{
-//            Log.v("URL,,",String.valueOf(url));
             jsonResponse = makeHTTPRequest(url);
             extractMovieDataFromJson(jsonResponse,context);
         }catch (IOException e){
@@ -64,27 +63,24 @@ public class QueryUtils {
     }
 
     private static void extractMovieDataFromJson(String movieJSON, Context context) {
-                if(!TextUtils.isEmpty(movieJSON)) {
-                    int movieId;
-                    String movieTitle;
-                    String movieImgUrl;
-                    String movieYear;
-                    String movieOverview;
-                    double movieRate;
-                    int movieRuntime;
-                    String movieReviewUrl;
-                    String movieVideoUrl;
-                    String movieOriTitle;
-                    String movieLanguage;
+        if(!TextUtils.isEmpty(movieJSON)) {
+            int movieId;
+            String movieTitle;
+            String movieImgUrl;
+            String movieYear;
+            String movieOverview;
+            double movieRate;
+            int movieRuntime;
+            String movieReviewUrl;
+            String movieVideoUrl;
+            String movieOriTitle;
+            String movieLanguage;
 
             try {
                 JSONObject movieListJsonObject = new JSONObject(movieJSON);
                 JSONArray movieListJsonArray = movieListJsonObject.getJSONArray("results");
-                Log.v("length", String.valueOf(movieListJsonArray.length()));
                 ContentValues[] cvs = new ContentValues[movieListJsonArray.length()];
-                for (int i = 0; i < 3; i++) {
-//                    for (int i = 0; i < movieListJsonArray.length(); i++) {
-                    Log.v("i", String.valueOf(i));
+                for (int i = 0; i < movieListJsonArray.length(); i++) {
                     JSONObject listJ = movieListJsonArray.getJSONObject(i);
                     movieId = listJ.getInt("id");
                     movieTitle = listJ.getString("title");
@@ -103,10 +99,8 @@ public class QueryUtils {
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-//                    Log.v("DetailUrl",detailString);
 
                     JSONObject detailJ = new JSONObject(detailJsonResponse);
-//                    Log.v("detailJ", String.valueOf(detailJ));
 
                     movieRuntime = detailJ.getInt("runtime");
 
@@ -149,8 +143,6 @@ public class QueryUtils {
                     cv.put(MovieEntry.COLUMN_MOVIE_HIGH,mIsHigh);
                     cv.put(MovieEntry.COLUMN_MOVIE_FAVOURITE,mIsFav);
                     cvs[i] = cv;
-//                    context.getContentResolver().insert(MovieEntry.CONTENT_URI, cv);
-//                    context.getContentResolver().bulkInsert(MovieEntry.CONTENT_URI,cvs);
                     String whereClause = MovieEntry.COLUMN_MOVIE_ID + "=?";
                     String[] whereArgs = {String.valueOf(movieId)};
                     context.getContentResolver().update(MovieEntry.CONTENT_URI,cv,whereClause,whereArgs);

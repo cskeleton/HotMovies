@@ -11,7 +11,6 @@ import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -57,7 +56,6 @@ public class CommentsFragment extends Fragment implements
 
         //Toolbar
         Toolbar toolbar = (Toolbar) rootCommentsView.findViewById(R.id.toolbar_comments);
-        toolbar.setTitle("Comments");
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
 
         mProgressbar = (ProgressBar) rootCommentsView.findViewById(R.id.comments_progress_bar);
@@ -67,7 +65,6 @@ public class CommentsFragment extends Fragment implements
         ListView listView = (ListView) rootCommentsView.findViewById(R.id.list_comments);
         listView.setEmptyView(mEmptyText);
         mAdapter = new ReviewAdapter(getActivity(),new ArrayList<Reviews>());
-        Log.v("ReviewUrl:",mReviewUrl);
         getLoaderManager().initLoader(REVIEW_LOADER,null,this);
         listView.setAdapter(mAdapter);
         return rootCommentsView;
@@ -75,7 +72,6 @@ public class CommentsFragment extends Fragment implements
 
     @Override
     public Loader<List<Reviews>> onCreateLoader(int id, Bundle args) {
-        Log.v("Reviews:","Starting Loading reviews.");
         return new ReviewLoader(getActivity(),mReviewUrl);
     }
 
@@ -94,7 +90,6 @@ public class CommentsFragment extends Fragment implements
                 mEmptyText.setText("No Internet connect available.");
             }
         }
-        Log.v("Reviews:","load reviews finished.");
     }
 
     @Override

@@ -28,6 +28,7 @@ import android.widget.AdapterView;
 import android.widget.GridView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import com.example.gucheng.hotmovies.R;
 import com.example.gucheng.hotmovies.activities.EditorActivity;
@@ -128,11 +129,16 @@ public class MainActivityFragment extends Fragment implements
                 if(mIsFavourite == 1){
                     mIsFavourite = 0;
                 }
-                //Get the data from Internet again.
-//                mProgressBar.setVisibility(View.VISIBLE);
-//                getActivity().getContentResolver().delete(MovieEntry.CONTENT_URI,null,null);
-                QueryMovies queryMovies = new QueryMovies(getActivity(),mUserLanguage,mIsPop,mIsHigh,mIsFavourite);
-                queryMovies.execute(requestUrl);
+
+                ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+                NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
+                if(networkInfo != null && networkInfo.isConnected()){
+                    QueryMovies queryMovies = new QueryMovies(getActivity(),mUserLanguage,mIsPop,mIsHigh,mIsFavourite);
+                    queryMovies.execute(requestUrl);
+                }else {
+                    Toast.makeText(getActivity(),"No Internet connect available.",Toast.LENGTH_SHORT).show();
+                    swipeRefreshLayout.setRefreshing(false);
+                }
             }
         });
 
@@ -208,7 +214,7 @@ public class MainActivityFragment extends Fragment implements
                 break;
             default:
                 selectionArgs = null;
-                Log.e("MainFragment 174","Wrong query selection:" + i);
+                Log.e("MainFragment 211","Wrong query selection:" + i);
         }
         getLoaderManager().restartLoader(IMAGE_LOADER,null,callback);
     }
@@ -234,17 +240,17 @@ public class MainActivityFragment extends Fragment implements
                 MovieEntry.COLUMN_MOVIE_REVIEW
         };
 
-        return new CursorLoader(getActivity(),MovieEntry.CONTENT_URI,projection, selection,selectionArgs,null);
+        return new CursorLoader(getActivity(),MovieEntry.CONTENT_URI,projection,selection,selectionArgs,null);
     }
 
     @Override
     public void onLoadFinished(Loader<Cursor> loader, Cursor cursor) {
         mProgressBar.setVisibility(View.GONE);
+        ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
+        NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
         if(cursor != null){
             mAdapter.swapCursor(cursor);
         }else {
-            ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
-            NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
             if(networkInfo != null && networkInfo.isConnected()){
                 mEmptyText.setText("No Movie to show.");
             }else {
