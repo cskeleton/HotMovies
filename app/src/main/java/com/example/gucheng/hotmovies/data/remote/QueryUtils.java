@@ -143,10 +143,8 @@ public class QueryUtils {
                     cv.put(MovieEntry.COLUMN_MOVIE_HIGH,mIsHigh);
                     cv.put(MovieEntry.COLUMN_MOVIE_FAVOURITE,mIsFav);
                     cvs[i] = cv;
-                    String whereClause = MovieEntry.COLUMN_MOVIE_ID + "=?";
-                    String[] whereArgs = {String.valueOf(movieId)};
-                    context.getContentResolver().update(MovieEntry.CONTENT_URI,cv,whereClause,whereArgs);
                 }
+                context.getContentResolver().bulkInsert(MovieEntry.CONTENT_URI,cvs);
             } catch (JSONException e) {
                 e.printStackTrace();
             }

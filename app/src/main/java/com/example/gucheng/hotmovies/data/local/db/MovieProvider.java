@@ -5,7 +5,6 @@ import android.content.ContentUris;
 import android.content.ContentValues;
 import android.content.UriMatcher;
 import android.database.Cursor;
-import android.database.sqlite.SQLiteAbortException;
 import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.support.annotation.NonNull;
@@ -104,12 +103,7 @@ public class MovieProvider extends ContentProvider {
                 SQLiteDatabase database = mMovieDbHelper.getWritableDatabase();
                 database.beginTransaction();
                 for(ContentValues cv : values){
-                    long newID = database.insertOrThrow(MovieEntry.TABLE_NAME,null,cv);
-                    if(newID <= 0){
-                        throw new SQLiteAbortException("Failed when bulk insert" + uri);
-                    }else {
-                        numInserted++;
-                    }
+                    long newID = database.insertWithOnConflict(MovieEntry.TABLE_NAME,null,cv,SQLiteDatabase.CONFLICT_IGNORE);
                 }
                 database.setTransactionSuccessful();
                 getContext().getContentResolver().notifyChange(uri,null);
@@ -133,13 +127,13 @@ public class MovieProvider extends ContentProvider {
 
     @Override
     public int update(Uri uri, ContentValues values, String selection, String[] selectionArgs) {
-        int mRowsUpdated = 0;
+        int mRowsUpdated;
         final SQLiteDatabase database = mMovieDbHelper.getWritableDatabase();
         final int match = sUriMatcher.match(uri);
         switch (match){
             case MOVIES:
                 mRowsUpdated = database.update(MovieEntry.TABLE_NAME,values,selection,selectionArgs);
-                Log.v("mRows", String.valueOf(mRowsUpdated));
+//                Log.v("mRows", String.valueOf(mRowsUpdated));
                 if(mRowsUpdated == 0){
                     database.insertWithOnConflict(MovieEntry.TABLE_NAME,null,values,SQLiteDatabase.CONFLICT_IGNORE);
                 }

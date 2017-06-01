@@ -9,6 +9,7 @@ import android.content.Loader;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.annotation.Nullable;
 import android.support.v7.app.AppCompatActivity;
@@ -111,8 +112,6 @@ public class EditorActivityFragment extends Fragment
 
         getLoaderManager().initLoader(EXISTING_MOVIE_LOADER,null,this);
 
-
-
         trailerButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -121,7 +120,7 @@ public class EditorActivityFragment extends Fragment
                     Intent i = new Intent(Intent.ACTION_VIEW,uri);
                     startActivity(i);
                 }else {
-                    Toast.makeText(getActivity(),"No Trailer available",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(),"Trailer unavailable",Toast.LENGTH_SHORT).show();
                 }
             }
         });
@@ -142,7 +141,7 @@ public class EditorActivityFragment extends Fragment
     public boolean onOptionsItemSelected(MenuItem item) {
         int id = item.getItemId();
         switch (id){
-            case R.id.show_comments:
+            case R.id.show_reviews:
                 Intent i = new Intent(getActivity(), CommentsActivity.class);
                 i.putExtra(MovieEntry.COLUMN_MOVIE_REVIEW,reviewString);
                 startActivity(i);
@@ -155,14 +154,17 @@ public class EditorActivityFragment extends Fragment
                     values.put(MovieEntry.COLUMN_MOVIE_FAVOURITE,1);
                     item.setIcon(R.drawable.ic_favorite_border_white_24dp);
                     isFavInt = 1;
-                    Toast.makeText(getActivity(),"Added to favourite.",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(),"Add to favourite.",Toast.LENGTH_SHORT).show();
                 }else {
                     values.put(MovieEntry.COLUMN_MOVIE_FAVOURITE,0);
                     item.setIcon(R.drawable.ic_favorite_white_24dp);
                     isFavInt = 0;
-                    Toast.makeText(getActivity(),"Removed from favourite.",Toast.LENGTH_SHORT).show();
+                    Toast.makeText(getActivity(),"Remove from favourite.",Toast.LENGTH_SHORT).show();
                 }
-                getActivity().getContentResolver().update(currentUri,values,whereClause,whereArgs);
+
+                //Set favourite statues to database.
+                SetFavourite setFavourite = new SetFavourite(values,whereClause,whereArgs);
+                setFavourite.execute();
                 break;
         }
         return super.onOptionsItemSelected(item);
@@ -239,5 +241,23 @@ public class EditorActivityFragment extends Fragment
         rateTextView.setText(null);
         runtimeTextView.setText(null);
         introTextView.setText(null);
+    }
+
+    private class SetFavourite extends AsyncTask<Void,Void,Void> {
+        private ContentValues mValues;
+        private String mWhereClause;
+        private String[] mWhereArgs;
+
+        private SetFavourite(ContentValues values, String whereClause, String[] whereArgs ){
+            mValues = values;
+            mWhereClause = whereClause;
+            mWhereArgs = whereArgs;
+        }
+
+        @Override
+        protected Void doInBackground(Void... voids) {
+            getContext().getContentResolver().update(currentUri, mValues, mWhereClause, mWhereArgs);
+            return null;
+        }
     }
 }

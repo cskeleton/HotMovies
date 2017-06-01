@@ -5,14 +5,14 @@
     tools:context="com.example.gucheng.hotmovies.activities.EditorActivity">
 
     <item
-        android:id="@+id/show_comments"
-        android:title="comments"
+        android:id="@+id/show_reviews"
+        android:title="@string/reviews"
         android:icon="@drawable/ic_comment_white_24dp"
         app:showAsAction="ifRoom" />
 
     <item
         android:id="@+id/add_favourite"
-        android:title="add to favourite"
+        android:title="@string/add_to_favourite"
         app:showAsAction="ifRoom" />
 
 </menu>
