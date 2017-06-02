@@ -7,7 +7,7 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:fitsSystemWindows="true"
-    tools:context="com.example.gucheng.hotmovies.Fragments.EditorActivityFragment" >
+    tools:context="com.example.gucheng.hotmovies.Fragments.DetailFragment" >
 
     <android.support.design.widget.AppBarLayout
         android:layout_width="match_parent"

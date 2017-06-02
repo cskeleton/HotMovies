@@ -8,6 +8,10 @@
     <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
     <uses-permission android:name="android.permission.MOUNT_UNMOUNT_FILESYSTEMS" />
 
+    <uses-permission android:name="android.permission.READ_SYNC_SETTINGS"/>
+    <uses-permission android:name="android.permission.WRITE_SYNC_SETTINGS"/>
+    <uses-permission android:name="android.permission.AUTHENTICATE_ACCOUNTS"/>
+
     <application
         android:allowBackup="true"
         android:icon="@mipmap/ic_launcher"
@@ -25,13 +29,9 @@
         </activity>
 
         <activity
-            android:name=".activities.EditorActivity"
-            android:label="@string/title_activity_editor"
+            android:name=".activities.DetailActivity"
+            android:label="@string/title_activity_detail"
             android:theme="@style/AppTheme.NoActionBar" >
-
-            <intent-filter>
-                <action android:name="android.intent.action.EDITOR" />
-            </intent-filter>
 
         </activity>
 
@@ -42,8 +42,26 @@
         <provider
             android:name=".data.local.db.MovieProvider"
             android:authorities="com.example.gucheng.hotmovies"
-            android:exported="false" />
+            android:exported="false"
+            android:syncable="true"/>
 
+        <service android:name=".data.sync.MovieAuthenticatorService">
+            <intent-filter>
+                <action android:name="android.accounts.AccountAuthenticator" />
+            </intent-filter>
+            <meta-data
+                android:name="android.accounts.AccountAuthenticator"
+                android:resource="@xml/authenticator" />
+        </service>
+
+        <service android:name=".data.sync.MovieSyncService"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.content.SyncAdapter" />
+            </intent-filter>
+            <meta-data
+                android:name="android.content.SyncAdapter"
+                android:resource="@xml/syncadapter"/>
+        </service>
     </application>
-
 </manifest>

@@ -8,14 +8,12 @@ import android.os.AsyncTask;
  */
 
 public class QueryMovies extends AsyncTask<String,Void,Void> {
-    private String mLanguage;
     private Context mContext;
     private int mIsPopular;
     private int mIsHigh;
     private int mIsFavourite;
 
-    public QueryMovies(Context context, String language, int isPopular, int isHigh, int isFavourite){
-        mLanguage = language;
+    public QueryMovies(Context context, int isPopular, int isHigh, int isFavourite){
         mContext = context;
         mIsPopular = isPopular;
         mIsHigh = isHigh;
@@ -24,7 +22,7 @@ public class QueryMovies extends AsyncTask<String,Void,Void> {
 
     @Override
     protected Void doInBackground(String... urls) {
-        QueryUtils.fetchMovieData(urls[0],mLanguage,mContext,mIsPopular,mIsHigh, mIsFavourite);
+        QueryUtils.fetchMovieData(urls[0],mContext,mIsPopular,mIsHigh, mIsFavourite);
         return null;
     }
 }

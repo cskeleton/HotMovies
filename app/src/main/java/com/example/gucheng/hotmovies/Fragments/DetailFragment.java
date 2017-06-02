@@ -39,7 +39,7 @@ import static com.example.gucheng.hotmovies.data.local.db.MovieContract.MovieEnt
 /**
  * A placeholder fragment containing a simple view.
  */
-public class EditorActivityFragment extends Fragment
+public class DetailFragment extends Fragment
         implements LoaderManager.LoaderCallbacks<Cursor>{
 
     private static final String RATE_STRING = " / 10";
@@ -75,7 +75,7 @@ public class EditorActivityFragment extends Fragment
     private int w_dip;
     float density;
 
-    public EditorActivityFragment() {
+    public DetailFragment() {
     }
 
     @Override
@@ -87,7 +87,7 @@ public class EditorActivityFragment extends Fragment
     @Override
     public View onCreateView(LayoutInflater inflater, ViewGroup container,
                              Bundle savedInstanceState) {
-        detailView = inflater.inflate(R.layout.fragment_editor, container, false);
+        detailView = inflater.inflate(R.layout.fragment_detail, container, false);
         //Toolbar
         toolbar = (Toolbar) detailView.findViewById(R.id.detail_toolbar);
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
@@ -130,7 +130,7 @@ public class EditorActivityFragment extends Fragment
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
-        inflater.inflate(R.menu.menu_editor, menu);
+        inflater.inflate(R.menu.menu_detail, menu);
         mFavItem = menu.findItem(R.id.add_favourite);
         if(isFavInt == 0){ mFavItem.setIcon(R.drawable.ic_favorite_white_24dp);}
         else { mFavItem.setIcon(R.drawable.ic_favorite_border_white_24dp); }

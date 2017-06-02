@@ -31,24 +31,25 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.example.gucheng.hotmovies.R;
-import com.example.gucheng.hotmovies.activities.EditorActivity;
+import com.example.gucheng.hotmovies.activities.DetailActivity;
 import com.example.gucheng.hotmovies.data.local.adapter.PosterAdapter;
 import com.example.gucheng.hotmovies.data.local.db.MovieContract.MovieEntry;
 import com.example.gucheng.hotmovies.data.remote.GetUrl;
-import com.example.gucheng.hotmovies.data.remote.QueryMovies;
+import com.example.gucheng.hotmovies.data.sync.MovieSyncAdapter;
 
 
 /**
  * A placeholder fragment containing a simple view.
  */
 
-public class MainActivityFragment extends Fragment implements
+public class MainFragment extends Fragment implements
         LoaderManager.LoaderCallbacks<Cursor>{
 
     private static final int IMAGE_LOADER = 1;
     private static final String POPULAR = "Popular";
     private static final String TOP_RATED = "Top Rated";
     private static final String FAVOURITE = "Favourite";
+    private static final String LOG_TAG = MainFragment.class.getSimpleName();
 
 
     private Toolbar toolbar;
@@ -63,9 +64,9 @@ public class MainActivityFragment extends Fragment implements
     private String selection = MovieEntry.COLUMN_MOVIE_POPULAR + "=? AND " + MovieEntry.COLUMN_MOVIE_HIGH + "=? " ;
     private static String[] selectionArgs;
     private static LoaderManager.LoaderCallbacks<Cursor>  callback;
-    private static int mIsPop;
-    private static int mIsHigh;
-    private static int mIsFavourite;
+    private static int mIsPop = 1;
+    private static int mIsHigh = 0;
+    private static int mIsFavourite = 0;
 
     @Override
     public void onCreate(@Nullable Bundle savedInstanceState) {
@@ -93,9 +94,7 @@ public class MainActivityFragment extends Fragment implements
         ((AppCompatActivity)getActivity()).setSupportActionBar(toolbar);
         toolbar.setTitle(POPULAR);
         callback = this;
-        mIsPop = 1;
-        mIsHigh = 0;
-        mIsFavourite = 0;
+        selectionArgs = new String[]{String.valueOf(mIsPop),String.valueOf(mIsHigh)};
 
         //Progress bar init
         mProgressBar = (ProgressBar) rootView.findViewById(R.id.progress_bar);
@@ -133,8 +132,11 @@ public class MainActivityFragment extends Fragment implements
                 ConnectivityManager connMgr = (ConnectivityManager) getActivity().getSystemService(Context.CONNECTIVITY_SERVICE);
                 NetworkInfo networkInfo = connMgr.getActiveNetworkInfo();
                 if(networkInfo != null && networkInfo.isConnected()){
-                    QueryMovies queryMovies = new QueryMovies(getActivity(),mUserLanguage,mIsPop,mIsHigh,mIsFavourite);
-                    queryMovies.execute(requestUrl);
+//                    QueryMovies queryMovies = new QueryMovies(getContext(),mIsPop,mIsHigh,mIsFavourite);
+//                    queryMovies.execute(requestUrl);
+
+                    // TODO: request refresh network here.
+                    MovieSyncAdapter.syncImmediately(getActivity(),requestUrl,mIsPop,mIsHigh,mIsFavourite);
                 }else {
                     Toast.makeText(getActivity(),"No Internet connect available.",Toast.LENGTH_SHORT).show();
                     swipeRefreshLayout.setRefreshing(false);
@@ -147,7 +149,7 @@ public class MainActivityFragment extends Fragment implements
             @Override
             public void onItemClick(AdapterView<?> adapterView, View view, int position, long id) {
 
-                Intent intent = new Intent(getActivity(),EditorActivity.class);
+                Intent intent = new Intent(getActivity(),DetailActivity.class);
                 Uri currentMovieUri = ContentUris.withAppendedId(MovieEntry.CONTENT_URI,id);
                 Log.v("Clicked uri", String.valueOf(currentMovieUri));
                 intent.setData(currentMovieUri);
@@ -258,6 +260,7 @@ public class MainActivityFragment extends Fragment implements
             }
         }
         swipeRefreshLayout.setRefreshing(false);
+        Log.v(LOG_TAG,"Load finished.");
     }
 
     @Override

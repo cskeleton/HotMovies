@@ -5,8 +5,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:fitsSystemWindows="true"
-    tools:context="com.example.gucheng.hotmovies.activities.EditorActivity">
+    tools:context="com.example.gucheng.hotmovies.activities.DetailActivity">
 
-    <include layout="@layout/content_editor" />
+    <include layout="@layout/content_detail" />
 
 </LinearLayout>
